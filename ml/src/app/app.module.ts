@@ -33,6 +33,7 @@ import {MatProgressBarModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import { HttpClientXsrfModule } from '@angular/common/http';
 import { MessageService }       from './sidenav/message.service';
+import { PapaParseModule } from 'ngx-papaparse';
 
 
 @NgModule({
@@ -71,7 +72,9 @@ import { MessageService }       from './sidenav/message.service';
     MatSidenavModule,
     MatProgressBarModule,
     MatDialogModule,
-    CommonModule
+    CommonModule,
+    PapaParseModule
+
   ],
   providers: [
   MessageService

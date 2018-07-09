@@ -13,27 +13,20 @@ export class SidenavComponent implements OnInit {
 
 
   message: string;
-	
+  
   constructor(private uploaderService: UploaderService) { }
 
   ngOnInit() {
   }
 
   onPicked(input: HTMLInputElement) {
-  	console.log("-----<<<< in to the pick function ");
+    console.log("-----<<<< in to the pick function ");
     const file = input.files[0];
     const data = '';
     if (file) {
-      this.uploaderService.upload(file).subscribe(
-      	data => { data = data},
-      	
-      	 // msg => {
-        //   input.value = null;
-        //   //this.message = msg;
-        // }
-      )
+      this.uploaderService.upload(file);
     }
-      	console.log("-----<<<< out of the the pick function ");
+        console.log("-----<<<< out of the the pick function ");
 
   }
 

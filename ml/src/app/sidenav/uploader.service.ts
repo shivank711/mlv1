@@ -1,20 +1,34 @@
 import { Injectable } from '@angular/core';
 import {
   HttpClient, HttpEvent, HttpEventType, HttpProgressEvent,
-  HttpRequest, HttpResponse, HttpErrorResponse
+  HttpRequest, HttpResponse, HttpErrorResponse, HttpHeaders
 } from '@angular/common/http';
+import {Response} from '@angular/http';
 
 import { of } from 'rxjs';
 import { catchError, last, map, tap } from 'rxjs/operators';
 import { MessageService } from './message.service';
-
+import { PapaParseService } from 'ngx-papaparse';
 
 @Injectable()
 export class UploaderService {
+  data: any = {};
   constructor(
     private http: HttpClient,
-    private messenger: MessageService
-    ) {}
+    private messenger: MessageService,
+    private papa: PapaParseService
+    ) {
+        // const csvData = '"Hello","World!"';
+        // debugger;
+        // const options = {
+        //     complete: (results, file) => {
+        //         console.log('Parsed: ', results, file);
+        //     }
+        //     // Add your options here
+        // };
+
+        // this.papa.parse(csvData,options);
+  }
 
   // If uploading multiple files, change to:
   // upload(files: FileList) {
@@ -27,7 +41,7 @@ export class UploaderService {
   upload(file: File) {
 
     if (!file) { return; }
-    console.log("dddd");
+    const vm = this;
     console.log(file)
     // COULD HAVE WRITTEN:
     // return this.http.post('/upload/file', file, {
@@ -42,87 +56,79 @@ export class UploaderService {
 
     // add the files
     // if (file && file.length) {
-      formData.append('file', file) ;
+      formData.append('file',file);
     // }
 
     // add the data object
     // formData.append('data', new Blob([JSON.stringify(data)], {type: 'application/json'}));
-
+    console.log(formData);
+    
     const url = "http://localhost:8080/user/fileUpload";
     console.log("after urll post");
-    const req = new HttpRequest('POST', url, formData, {
-      reportProgress: true,
+    // const req = new HttpRequest('POST', url, formData, {
+    //   reportProgress: true,
 
-
-    });
+    // });
     console.log("in the upload service");
     // The `HttpClient.request` API produces a raw event stream
     // which includes start (sent), progress, and response events.
-    return this.http.request(req).pipe(
-      map(event => this.getEventMessage(event, file)),
-      tap(message => this.showProgress(message)),
-      last(), // return last (completed) message to caller
-      catchError(this.handleError(file)),
-      
-    );
-    //console.log("this is the url of the post req"+ req.url);
-    //return this.http.request(req);
-
-
-  }
-
-  /** Return distinct message for sent, upload progress, & response events */
-  private getEventMessage(event: HttpEvent<any>, file: File) {
-    switch (event.type) {
-      case HttpEventType.Sent:
-        return `Uploading file "${file.name}" of size ${file.size}.`;
-
-      case HttpEventType.UploadProgress:
-        // Compute and show the % done:
-        const percentDone = Math.round(100 * event.loaded / event.total);
-        return `File "${file.name}" is ${percentDone}% uploaded.`;
-
-      case HttpEventType.Response:
-        return `File "${file.name}" was completely uploaded!`;
-
-      default:
-        return `File "${file.name}" surprising upload event: ${event.type}.`;
-    }
-  }
-
-  /**
-   * Returns a function that handles Http upload failures.
-   * @param file - File object for file being uploaded
-   *
-   * When no `UploadInterceptor` and no server,
-   * you'll end up here in the error handler.
-   */
-  private handleError(file: File) {
-    const userMessage = `${file.name} upload failed.`;
-
-    return (error: HttpErrorResponse) => {
-      // TODO: send the error to remote logging infrastructure
-      console.error(error); // log to console instead
-
-      const message = (error.error instanceof Error) ?
-        error.error.message :
-       `server returned code ${error.status} with body "${error.error}"`;
-
-     // this.messenger.add(`${userMessage} ${message}`);
-
-      // Let app keep running but indicate failure.
-      return of(userMessage);
+   
+    const httpOptions = {
+      reportProgress: true,
+      responseType: 'text' as 'text'
     };
-  }
+      // return this.http.request(req).subscribe(value => {
+      //     console.log("this is what i get from subscribe")
+      //     console.log(value);
+      //     this.data = value;
+      //   });
+      
+      // return this.http.post(url, formData, httpOptions).subscribe(data  =>{
+      //   this.data = data;
+       
+      //   console.log(this.data);
+      //   console.log("vm.papa..........---->>>>>")
+      //   console.log(vm.papa)
+      //   console.log("going in the debuggerrr------>>>>>>")
+      //   const value = data;
+      //          debugger;
 
-  private showProgress(message: string) {
-    this.messenger.add(message);
+        
+        //console.log(data);
+//        const options = {
+//            complete: (results, file) => {
+//                console.log('Parsed: ', results, file);
+//           }
+            // Add your options here
+//        };
+//        console.log("papa.parse--->>>")
+//        this.papa.parse(value,options);
+//        console.log(value);
+//        debugger;
+          // papa.parse(data,{
+          //     complete: (results, file) => {
+          //         console.log('Parsed: ', results, file);
+          //     }
+          // });
+        // if (data.type == 2) {
+        //   console.log(data.body);
+        // }
+//      }); 
+         return this.http.post(url, formData, httpOptions).subscribe(data => {
+           console.log(data);
+           const options ={
+             complete: (results, file)=>{
+               console.log('Paresed', results, file)
+             }
+           };
+           console.log(this.papa.parse(data,options))
+           console.log("parsed data is as follows---")
+           console.log(data)
+           debugger;
+         })   
+        
   }
 }
 
 
-/*
-Copyright 2017-2018 Google Inc. All Rights Reserved.
-Use of this source code is governed by an MIT-style license that
-can be found in the LICENSE file at http://angular.io/license
-*/
+
