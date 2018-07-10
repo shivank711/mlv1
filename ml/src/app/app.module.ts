@@ -32,7 +32,6 @@ import { BodyComponent } from './body/body.component';
 import {MatProgressBarModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import { HttpClientXsrfModule } from '@angular/common/http';
-import { MessageService }       from './sidenav/message.service';
 import { PapaParseModule } from 'ngx-papaparse';
 
 
@@ -77,7 +76,6 @@ import { PapaParseModule } from 'ngx-papaparse';
 
   ],
   providers: [
-  MessageService
   ],
   entryComponents: [],
   bootstrap: [AppComponent]
