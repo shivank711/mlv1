@@ -10,6 +10,9 @@
     "experimentalDecorators": true,
     "target": "es5",
     "paths": { "stream": [ "./node_modules/readable-stream" ] },
+    "types": [
+      "hammerjs"
+    ],
     "typeRoots": [
       "node_modules/@types"
     ],
@@ -18,4 +21,6 @@
       "dom"
     ]
   }
+
+
 }

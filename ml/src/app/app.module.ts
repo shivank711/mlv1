@@ -33,8 +33,33 @@ import {MatProgressBarModule} from '@angular/material';
 import {HttpClientModule} from '@angular/common/http';
 import { HttpClientXsrfModule } from '@angular/common/http';
 import { PapaParseModule } from 'ngx-papaparse';
-
-
+import {UploaderService} from './sidenav/uploader.service';
+import {MatTableModule} from '@angular/material/table';
+import {CdkTableModule} from '@angular/cdk/table';
+import {CdkTreeModule} from '@angular/cdk/tree';
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import 'hammerjs';
+import {
+  MatAutocompleteModule,
+  MatBadgeModule,
+  MatBottomSheetModule,
+  MatButtonToggleModule,
+  MatChipsModule,
+  MatDatepickerModule,
+  MatExpansionModule,
+  MatNativeDateModule,
+  MatPaginatorModule,
+  MatProgressSpinnerModule,
+  MatRadioModule,
+  MatRippleModule,
+  MatSliderModule,
+  MatSnackBarModule,
+  MatSortModule,
+  MatStepperModule,
+  MatTabsModule,
+  MatTooltipModule,
+  MatTreeModule,
+} from '@angular/material';
 @NgModule({
   declarations: [
     AppComponent,
@@ -72,11 +97,30 @@ import { PapaParseModule } from 'ngx-papaparse';
     MatProgressBarModule,
     MatDialogModule,
     CommonModule,
-    PapaParseModule
-
+    PapaParseModule,
+    MatTableModule,
+    MatAutocompleteModule,
+  MatBadgeModule,
+  MatBottomSheetModule,
+  MatButtonToggleModule,
+  MatChipsModule,
+  MatDatepickerModule,
+  MatExpansionModule,
+  MatNativeDateModule,
+  MatPaginatorModule,
+  MatProgressSpinnerModule,
+  MatRadioModule,
+  MatRippleModule,
+  MatSliderModule,
+  MatSnackBarModule,
+  MatSortModule,
+  MatStepperModule,
+  MatTabsModule,
+  MatTooltipModule,
+  MatTreeModule
+  
   ],
-  providers: [
-  ],
+  providers: [ UploaderService],
   entryComponents: [],
   bootstrap: [AppComponent]
 })
