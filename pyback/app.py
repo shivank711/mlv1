@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request, render_template, json
+from flask import Flask, redirect, url_for, request, render_template, json, Response
 from flask_cors import CORS, cross_origin
 from flask_jsonpify import jsonify
 import os
@@ -10,8 +10,15 @@ import io
 import csv
 from flask_pymongo import PyMongo
 import pandas as pd
+from sklearn.preprocessing import Imputer
+from sklearn.preprocessing import LabelEncoder
+
+
 UPLOAD_FOLDER = '/home/shivank/pyang/pyback/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'csv'])
+
+df = pd.DataFrame()
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -20,21 +27,6 @@ app.config['MONGO_URI'] = "mongodb://localhost:27017/myDatabase"
 mongo = PyMongo(app)
 CORS(app)
 
-# @app.route('/success/<name>')
-# def success(name):
-#    return 'welcome %s' % name
-
-# @app.route('/login',methods = ['POST', 'GET'])
-# def login():
-#    if request.method == 'POST':
-#       user = request.form['nm']
-#       return redirect(url_for('success',name = user))
-#    else:
-#       user = request.args.get('nm')
-#       return redirect(url_for('success',name = user))
-# @app.route('/')
-# def student():
-# 	return render_template('student.html')
 @app.route('/hello')
 def diss():
 	return jsonify({'test':'application'})
@@ -49,8 +41,7 @@ def result():
 		result = request.form
 		return render_template('result.html', result = result) 
 	
-# if __name__ == '__main__':
-#    app.run(debug = True)
+
 def transform(text_file_contents):
     return text_file_contents.replace("=", ",")
 
@@ -64,23 +55,6 @@ def uploaded_file(filename):
     f = request.files[filename]
     print(f)
     return jsonify({'text' : 'thaisdash'})
-    # if not f:
-    #     return "No file"
-
-    # stream = io.StringIO(f.stream.read().decode("UTF8"), newline=None)
-    # csv_input = csv.reader(stream)
-    # #print("file contents: ", file_contents)
-    # #print(type(file_contents))
-    # print(csv_input)
-    # for row in csv_input:
-    #     print(row)
-
-    # stream.seek(0)
-    # result = transform(stream.read())
-    # response = make_response(result)
-    # response.headers["Content-Disposition"] = "attachment; filename=filename"
-    # response.headers["Access-Control-Allow-Origin"]=  '*'
-    # return response
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
@@ -100,35 +74,65 @@ def upload_file():
             print(UPLOAD_FOLDER)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             mongo.save_file(filename, request.files["file"])
-            # f = request.files['file']
-            # if not f:
-            #     return "No file"
-            # stream = io.StringIO(f.stream.read().decode("UTF8"), newline=None)
-            # csv_input = csv.reader(stream)
-            # for row in csv_input:
-            #     print("row")
-            #     print(row)
-            # stream.seek(0)
-            # result = transform(stream.read())
-            # response = make_response(result)
-            # response.headers["Content-Disposition"] = "attachment; filename=filename"
-            # response.headers["Access-Control-Allow-Origin"]=  '*'
+            
             df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print(df.shape) 
             return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename, mimetype = 'text/csv')
 
-            #print(result)    
-            #return jsonify({'text' : 'file uploaded successfully'})
-            # return result           
+#find missing values in the uploaded data and descriptive analytics
+#give file name in the request url, will return describe of all the neumeric columns
+@app.route('/descriptive/<filename>', methods = ['GET'])
+def descriptive(filename):
+    if request.method =="GET":
+        df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        description = df.describe()
+        data = description.to_json()        
+    return data
 
+#find missing values in the filename 
+@app.route('/missing/<filename>', methods = ['GET'])
+def missing(filename):
+    if request.method =="GET":
+        df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        missing = []
+        for _ in df.columns:
+            missing.append("'{}' : '{}'".format(_, df[_].isnull().sum()))
+        return jsonify(missing)
+#find data type of the columns in the dataframe
+@app.route('/dtype/<filename>', methods = ['GET'])
+def dtype(filename):
+    if request.method == 'GET':
+        df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        dff = df.dtypes
+        return dff.to_json()        
 
-            # return redirect(url_for('uploaded_file',
-            #                         filename=filename))
-            # return jsonify({'text':'file uploaded successfully'})
-            # return mongo.send_file(filename)
-            # return jsonify({'text':'file uploaded successfully'})
-            
+#find correlation 
+@app.route('/corr/<filename>', methods =['GET'])
+def correlation(filename):
+    if request.method == 'GET':
+        df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        corr = df.corr()
+        corr = corr.to_json()        
+    return corr
+
+#missing value imputation takes filename col name and method in the url
+
+@app.route('/imputemiss/<filename>/<col>/<method>', methods = ['GET'])
+def imputemissing(filename,col,method):
+    df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    if method == 'mean':
+        mean_value = df[col].mean()
+        df[col] = df[col].fillna(mean_value)
+        return df[col].to_json()
+    if method == 'median':
+        median_value = df[col].median()
+        df[col] = df[col].fillna(median_value)
+        return df[col].to_json()    
+    if method == 'rm':
+        df = df.dropna(axis=0, how = 'any', thresh=None, subset=None, inplace=False)
+        return df.to_json()
+        
 
 if __name__ == '__main__':
 	app.run(port = 5004, debug = True)

@@ -8,5 +8,8 @@
 	column-width: 250px;
 	max-width: 250px;
 	
+}
+table{
 
+	width:100%; 
 }

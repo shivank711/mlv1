@@ -15,7 +15,9 @@ export class UploaderService {
   data: any = {};
   csvData: any[] = [];
   parseData : any;
-  dataArray : any ;
+  dataArray : any;
+  dataSource : any;
+  displayedColumn: any;
   constructor(
     private http: HttpClient,
     private papa: PapaParseService
@@ -100,6 +102,9 @@ export class UploaderService {
              }
 
            })
+           this.dataSource = this.parseData.data;
+           this.displayedColumn = this.parseData.meta.fields;
+
            console.log("this.parsedata.fields[0]----------====== - >")
            console.log(this.parseData.meta.fields[0])
            err => this.handleError(err);          
